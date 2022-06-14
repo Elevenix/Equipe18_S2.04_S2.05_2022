@@ -6,11 +6,13 @@ import xarray as xr
 import pandas
 import plotly.express as px
 conn = sqlite3.connect("test.db")
+# Convertir netcdf en csv
 def netcdf_to_csv(input, output):
     xr.open_dataset(input).to_dataframe().to_csv(output)
 
 netcdf_to_csv("CMIP6 - Mean temperature (T) Change deg C - Medium Term (2041-2060) SSP5-8.5 (rel. to 1995-2014) - Annual (34 models).nc", "change_deg.csv")
 
+# Créér une table dans la BD à partir d'un fichier CSV
 def table_from_csv(file, name):
     df = pandas.read_csv(file)
     df.to_sql(name, conn, if_exists="replace")
@@ -23,6 +25,7 @@ def columns_to_values(df, index, name, value_name="Value", end_index=None):
         value_vars=df.iloc[:, index:end_index],
         value_name=value_name)
 
+# Sélectionner un pays
 def select_country(name, df):
     return df[df['Country Name']==name]
 
@@ -38,6 +41,7 @@ ghg = columns_to_values(ghg, 1, 'Country','Emissions', end_index=6)
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
+# Renommer la première colonne sans nom
 def rename_column(df, name):
     df.rename( columns={'Unnamed: 0':name}, inplace=True )
 
@@ -47,6 +51,7 @@ def select_date(date, df):
 def select_source(source, df):
     return df[df["Source"]==source]
 
+# Prendre seulement l'année dans la date
 def convert_date(df):
     df["Date"] = df['Date'].astype(str).str[:4]
     return df
@@ -75,6 +80,8 @@ app.layout = html.Div(children=[
         dcc.Tab(label='Emissions', value='Emissions'),
     ]),
 
+    # Fonctionnalité: Afficher les GES en fonction du pays
+    # Fonctionnalité: Causes des émissions GES
     dcc.Graph(
         id='gdp'
     ),
@@ -86,13 +93,12 @@ app.layout = html.Div(children=[
     ),
     html.H2(children='Global energy production'),
 
-
     dcc.Graph(
         id='energy-by-source-time',
         figure=energyFig
     ),
 
-
+    # Afficher la production d’énergies
     html.Div(children=['''
     ''', html.Label('Year'),
         dcc.Dropdown(energy['Date'].unique(), id="date", value="2016")]),
