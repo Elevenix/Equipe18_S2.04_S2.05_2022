@@ -18,86 +18,83 @@ CREATE TABLE T_Continents (
 )
 """)
 
-# Creation de la table Annee
-cursor.execute("""
-CREATE TABLE T_Annees (
-    id_Annee INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    Annee INT NOT NULL
-)
-""")
-
 # Creation de la table Pays
 cursor.execute("""
 CREATE TABLE T_Pays (
     id_Pays INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     REF_Pays_Continent INT NOT NULL,
-    REF_Pays_Activitee INT NOT NULL,
+    REF_Pays_Secteurs INT NOT NULL,
+    REF_Pays_Emission INT NOT NULL,
     Nom_Pays VARCHAR(100) NOT NULL,
     CONSTRAINT FK_Pays_Continent FOREIGN KEY (REF_Pays_Continent) 
         REFERENCES T_Continents(id_Continent),
-    CONSTRAINT FK_Pays_Activitee FOREIGN KEY (REF_Pays_Activitee)
-        REFERENCES T_Activitees(id_Activitee)
+    CONSTRAINT FK_Pays_Secteur FOREIGN KEY (REF_Pays_Secteurs)
+        REFERENCES T_Secteurs(id_Secteur)
+    CONSTRAINT FK_Pays_Emission FOREIGN KEY (REF_Pays_Emission)
+        REFERENCES T_Emissions(id_Emission)
 )
 """)
 
 # Creation de la relation Pays/Annee
 cursor.execute("""
-CREATE TABLE TJ_Pays_Annee (
-    id_Pays INT NOT NULL,
-    id_Annee INT NOT NULL,
-    Nb_Habitants INT NOT NULL,
-    Temperature INT NOT NULL,
-    Precipitation REAL NOT NULL,
-    Niv_Mer REAL NOT NULL,
-    CONSTRAINT FK_Pays FOREIGN KEY (id_Pays)
-        REFERENCES T_Pays(id_Pays),
-    CONSTRAINT FK_Annee FOREIGN KEY (id_Annee)
-        REFERENCES T_Annees(id_Annee)
-)
+CREATE TABLE TJ_Secteurs_Energies (
+    id_Secteur INT NOT NULL,
+    id_Energie INT NOT NULL,
+    Quantite REAL NOT NULL,
+    Annee INT NOT NULL,
+    CONSTRAINT FK_Pays FOREIGN KEY (id_Secteur)
+        REFERENCES T_Secteurs(id_Secteur),
+    CONSTRAINT FK_Energie FOREIGN KEY (id_Energie)
+        REFERENCES T_Energies(id_Energie)
+    )
 """)
 
 # Creation de la table Energie
 cursor.execute("""
 CREATE TABLE T_Energies (
     id_Energie INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    REF_Energie_Pays INT,
-    REF_Energie_Activitee INT,
-    Nom_Energie VARCHAR(100) NOT NULL,
-    Renouvelabilité BOOLEAN,
-    CONSTRAINT FK_Energie_Pays FOREIGN KEY (REF_Energie_Pays)
-        REFERENCES T_Pays(id_Pays)
-    CONSTRAINT FK_Energie_Activitee FOREIGN KEY (REF_Energie_Activitee)
-        REFERENCES T_Activitees(id_Activitee)
+    Nom_Energie VARCHAR(100) NOT NULL
 )
 """)
 
 # Creation de la relation Energie/Annee
 cursor.execute("""
-CREATE TABLE TJ_Eng_Annee (
+CREATE TABLE TJ_Energies_Pays (
     id_Energie INT NOT NULL,
-    id_Annee INT NOT NULL,
-    Empreinte_Carb REAL NOT NULL,
+    id_Pays INT NOT NULL,
     Qtt_Energie_Prod REAL,
     Qtt_Energie_Cons REAL NOT NULL,
+    Annee INT NOT NULL,
     CONSTRAINT FK_Energie FOREIGN KEY (id_Energie)
         REFERENCES T_Energies(id_Energie),
-    CONSTRAINT FK_Annee FOREIGN KEY (id_Annee)
-        REFERENCES T_Annees(id_Annee)
+    CONSTRAINT FK_Pays FOREIGN KEY (id_Pays)
+        REFERENCES T_Pays(id_Pays)
 )
 """)
 
 # Creation de la table activite
 cursor.execute("""
-CREATE TABLE T_Activitees (
-    id_Activitee INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    REF_Activitee_Pays INT,
-    REF_Activitee_Energie INT,
-    Nom_Activitee VARCHAR(100) NOT NULL,
-    CONSTRAINT FK_Activitee_Pays FOREIGN KEY (REF_Activitee_Pays)
+CREATE TABLE T_Secteur (
+    id_Secteur INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    REF_Secteur_Pays INT,
+    Nom_Secteur VARCHAR(100) NOT NULL,
+    CONSTRAINT FK_Secteur_Pays FOREIGN KEY (REF_Secteur_Pays)
         REFERENCES T_Pays(id_Pays)
-    CONSTRAINT FK_Activitee_Energie FOREIGN KEY (REF_Activitee_Energie)
-        REFERENCES T_Energies(id_Energie)
 )
 """)
+
+# Creation de la table Emission
+cursor.execute("""
+    CREATE TABLE T_Emissions (
+        id_Emission INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        REF_Emission_Pays INT,
+        PIB REAL NOT NULL,
+        Emission_GES REAL NOT NULL,
+        Année INT NOT NULL
+        CONSTRAINT FK_Emission_Pays FOREIGN KEY (REF_Emission_Pays)
+            REFERENCES T_Pays(id_Pays)
+)
+""")
+
 
 conn.close()
