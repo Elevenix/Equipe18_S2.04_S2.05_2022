@@ -35,9 +35,22 @@ gdp = columns_to_values(gdp, 4, 'Date', 'GDP')
 energy = pandas.read_csv("Primary Energy Consumption by source, World, 1980-2016 (in Mtoe).csv")
 # TODO: INSERT 0s WHEN CELL IS EMPTY
 energy = columns_to_values(energy, 1, 'Source', end_index=11)
+sea_level = pandas.read_csv("CMIP6 - Sea level rise (SLR) Change meters - Long Term (2081-2100) SSP5-8.5 (rel. to 1995-2014) - Annual.csv")
+
+change_deg = pandas.read_csv("change_deg.csv")
 
 ghg = pandas.read_csv("Greenhouse Gas per capita, 1850-2015 (in tCO2eq).csv", sep=";", decimal=",")
 ghg = columns_to_values(ghg, 1, 'Country','Emissions', end_index=6)
+
+energy_by_sector = pandas.read_excel("IRENA_REmap_Global_Renewables_Outlook_2020_edition.xlsx")
+energy_by_sector = energy_by_sector[energy_by_sector["Sub-category"] == "Total"]
+energy_by_sector = energy_by_sector[energy_by_sector["Region"] == "World"]
+energy_by_sector = energy_by_sector[energy_by_sector["Case"] == "Planned Energy Scenario"]
+energy_by_sector = energy_by_sector[energy_by_sector["type (Unit)"] == "Supply and demand (EJ)"]
+energy_by_sector = energy_by_sector[energy_by_sector["Category"] != "TFEC (excl. non-energy uses)"]
+energy_by_sector = energy_by_sector[energy_by_sector["Category"] != "TPES"]
+
+print(energy_by_sector)
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
@@ -56,17 +69,23 @@ def convert_date(df):
     df["Date"] = df['Date'].astype(str).str[:4]
     return df
 
+def map(df, z):
+    return px.density_mapbox(df, lat='lat', lon='lon', z=z, radius=6,
+                        opacity=0.5, zoom=0.4,
+                        mapbox_style="stamen-terrain")
+
 rename_column(energy, "Date")
 convert_date(energy)
 rename_column(ghg, "Date")
 convert_date(ghg)
-energyFig = px.line(energy, x="Date", y="Value", title='Energy production by source over time', color="Source")
-
 comparison = gdp.merge(ghg, left_on=["Date", "Country Name"], right_on=["Date", "Country"])
 
-degree_map = px.density_mapbox(pandas.read_csv("change_deg.csv"), lat='lat', lon='lon', z='tas_anom', radius=6,
-                        opacity=0.5, zoom=0.4,
-                        mapbox_style="stamen-terrain")
+energy_fig = px.line(energy, x="Date", y="Value", title='Energy consumption by source over time', color="Source")
+energy_by_sector_fig = px.pie(energy_by_sector, values=2017, names="Category")
+
+degree_map = map(change_deg, 'tas_anom')
+sea_level_map  = map(sea_level, 'total')
+
 app.layout = html.Div(children=[
     html.H1(children='CoffeeRock'),
     html.H2(children='Countries'),
@@ -80,22 +99,40 @@ app.layout = html.Div(children=[
         dcc.Tab(label='Emissions', value='Emissions'),
     ]),
 
+
     # Fonctionnalité: Afficher les GES en fonction du pays
     # Fonctionnalité: Causes des émissions GES
     dcc.Graph(
         id='gdp'
     ),
     html.H2(children='Degree change'),
-
     dcc.Graph(
         id='degree-map',
         figure=degree_map
     ),
-    html.H2(children='Global energy production'),
+
+
+    html.H2(children='Sea level change'),
+
+    dcc.Graph(
+        id='sea-level-map',
+        figure=sea_level_map
+    ),
+
+
+    html.H2(children='Energy consumption by sector (2017)'),
+
+    dcc.Graph(
+        id='energy-by-sector',
+        figure=energy_by_sector_fig
+    ),
+
+
+    html.H2(children='Global energy consumption'),
 
     dcc.Graph(
         id='energy-by-source-time',
-        figure=energyFig
+        figure=energy_fig
     ),
 
     # Afficher la production d’énergies
@@ -106,7 +143,7 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='energy-by-source',
     ),
-])
+], style={'font-family': 'Arial'})
 
 
 pandas.options.plotting.backend = "plotly"
