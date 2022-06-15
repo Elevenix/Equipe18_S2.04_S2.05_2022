@@ -35,6 +35,18 @@ gdp = columns_to_values(gdp, 4, 'Date', 'GDP')
 energy = pandas.read_csv("Primary Energy Consumption by source, World, 1980-2016 (in Mtoe).csv")
 # TODO: INSERT 0s WHEN CELL IS EMPTY
 energy = columns_to_values(energy, 1, 'Source', end_index=11)
+
+
+energy_countries=[
+    ("Primary Energy Consumption by source, France, 1980-2016 (in Mtoe).csv", "France"),
+    ("Primary Energy Consumption by source, China, 1980-2016 (in Mtoe).csv", "China")
+]
+energy["Country Name"] = "World"
+for val in energy_countries:
+    energy_country = pandas.read_csv(val[0])
+    energy_country= columns_to_values(energy_country, 1, 'Source', end_index=11)
+    energy_country["Country Name"] = val[1]
+    energy = pandas.concat([energy, energy_country], axis=0)
 sea_level = pandas.read_csv("CMIP6 - Sea level rise (SLR) Change meters - Long Term (2081-2100) SSP5-8.5 (rel. to 1995-2014) - Annual.csv")
 
 change_deg = pandas.read_csv("change_deg.csv")
@@ -50,7 +62,6 @@ energy_by_sector = energy_by_sector[energy_by_sector["type (Unit)"] == "Supply a
 energy_by_sector = energy_by_sector[energy_by_sector["Category"] != "TFEC (excl. non-energy uses)"]
 energy_by_sector = energy_by_sector[energy_by_sector["Category"] != "TPES"]
 
-print(energy_by_sector)
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
@@ -80,12 +91,11 @@ rename_column(ghg, "Date")
 convert_date(ghg)
 comparison = gdp.merge(ghg, left_on=["Date", "Country Name"], right_on=["Date", "Country"])
 
-energy_fig = px.line(energy, x="Date", y="Value", title='Energy consumption by source over time', color="Source")
 energy_by_sector_fig = px.pie(energy_by_sector, values=2017, names="Category")
 
 degree_map = map(change_deg, 'tas_anom')
 sea_level_map  = map(sea_level, 'total')
-
+print(energy)
 app.layout = html.Div(children=[
     html.H1(children='CoffeeRock'),
     html.H2(children='Countries'),
@@ -98,13 +108,35 @@ app.layout = html.Div(children=[
         dcc.Tab(label='GDP', value='GDP'),
         dcc.Tab(label='Emissions', value='Emissions'),
     ]),
-
-
-    # Fonctionnalité: Afficher les GES en fonction du pays
+    
+        # Fonctionnalité: Afficher les GES en fonction du pays
     # Fonctionnalité: Causes des émissions GES
     dcc.Graph(
         id='gdp'
     ),
+
+    html.H2(children='Energy consumption'),
+
+        # Afficher la production d’énergies
+    html.Div(children=['''
+    ''', html.Label('Year'),
+        dcc.Dropdown(energy['Date'].unique(), id="date", value="2016")]),
+
+    dcc.Graph(
+        id='energy-by-source',
+    ),
+
+    dcc.Graph(
+        id='energy-consumption',
+    ),
+
+    html.H2(children='Global energy consumption by sector (2017)'),
+
+    dcc.Graph(
+        id='energy-by-sector',
+        figure=energy_by_sector_fig
+    ),
+
     html.H2(children='Degree change'),
     dcc.Graph(
         id='degree-map',
@@ -119,30 +151,6 @@ app.layout = html.Div(children=[
         figure=sea_level_map
     ),
 
-
-    html.H2(children='Energy consumption by sector (2017)'),
-
-    dcc.Graph(
-        id='energy-by-sector',
-        figure=energy_by_sector_fig
-    ),
-
-
-    html.H2(children='Global energy consumption'),
-
-    dcc.Graph(
-        id='energy-by-source-time',
-        figure=energy_fig
-    ),
-
-    # Afficher la production d’énergies
-    html.Div(children=['''
-    ''', html.Label('Year'),
-        dcc.Dropdown(energy['Date'].unique(), id="date", value="2016")]),
-
-    dcc.Graph(
-        id='energy-by-source',
-    ),
 ], style={'font-family': 'Arial'})
 
 
@@ -150,25 +158,22 @@ pandas.options.plotting.backend = "plotly"
 
 @app.callback(
     Output('gdp', 'figure'),
+    Output('energy-consumption', 'figure'),
     Input('country-name', 'value'),
     Input('data', 'value'))
 def update_graph(country_name, data):
     comparison_data = select_country(country_name, comparison)
-    return comparison_data.plot(x='Date', y=data)
+    energy_data = energy[energy["Country Name"] == country_name]
+    return (comparison_data.plot(x='Date', y=data), px.line(energy_data, x="Date", y="Value", color="Source", title='Energy consumption by source over time'))
 
 @app.callback(
     Output('energy-by-source', 'figure'),
+    Input('country-name', 'value'),
     Input('date', 'value'))
-def update_energy(date):
+def update_energy(country_name, date):
     energy_data = select_date(date, energy)
+    energy_data = select_country(country_name, energy_data)
     return px.pie(energy_data, values="Value", names="Source")
-
-@app.callback(
-    Output('energy-source-time', 'figure'),
-    Input('source', 'value'))
-def update_energy_source(source):
-    energy_data = select_source(source, energy)
-    return px.line(energy_data, x="Date", y="Value", title='Energy production by source over time')
 
 if __name__ == '__main__':
     app.run_server(debug=True)
