@@ -45,6 +45,7 @@ def convert_date(df):
 
 # Créér une carte
 def map(df, z):
-    return px.density_mapbox(df, lat='lat', lon='lon', z=z, radius=6,
-                        opacity=0.5, zoom=0.4,
-                        mapbox_style="stamen-terrain")
+    fig = px.scatter_mapbox(df, lat="lat", lon="lon", color=z, zoom=0.4, opacity=0.2,
+                  color_continuous_scale=px.colors.cyclical.IceFire,  mapbox_style="stamen-terrain", width=1000, height=700)
+    fig.update_traces(marker={'size': 10})
+    return fig

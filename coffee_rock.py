@@ -61,7 +61,7 @@ app.layout = html.Div(children=[
         figure=energy_by_sector_fig
     ),
 
-    html.H2(children='Degree change'),
+    html.H2(children='Temperature change'),
     dcc.Graph(
         id='degree-map',
         figure=degree_map
