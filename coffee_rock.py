@@ -36,7 +36,7 @@ app.layout = html.Div(children=[
     # Fonctionnalité: Afficher les GES en fonction du pays
     # Fonctionnalité: Causes des émissions GES
     dcc.Graph(
-        id='gdp'
+        id='comparison'
     ),
 
     html.H2(children='Energy consumption'),
@@ -78,7 +78,7 @@ app.layout = html.Div(children=[
 ], style={'font-family': 'Arial'})
 
 @app.callback(
-    Output('gdp', 'figure'),
+    Output('comparison', 'figure'),
     Output('energy-consumption', 'figure'),
     Input('country-name', 'value'),
     Input('data', 'value'))
