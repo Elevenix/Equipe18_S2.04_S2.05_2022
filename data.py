@@ -22,6 +22,7 @@ def get_gdp():
     gdp = pd.read_excel("data/API_NY.GDP.MKTP.KD_DS2_en_excel_v2_4150998.xls")
     gdp.to_csv("data/API_NY.GDP.MKTP.KD_DS2_en_csv_v2_4150850.csv", sep=";", decimal=",")
     gdp = lib.columns_to_values(gdp, 4, 'Date', 'GDP')
+    gdp['Country Name'].replace({"United States": "United States of America", "Cote d'Ivoire": "Ivory Coast"}, inplace=True)
     return gdp
 
 def get_footprint():
