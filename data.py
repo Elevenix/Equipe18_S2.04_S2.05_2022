@@ -22,19 +22,22 @@ def get_gdp():
     gdp = pd.read_excel("data/API_NY.GDP.MKTP.KD_DS2_en_excel_v2_4150998.xls")
     gdp.to_csv("data/API_NY.GDP.MKTP.KD_DS2_en_csv_v2_4150850.csv", sep=";", decimal=",")
     gdp = lib.columns_to_values(gdp, 4, 'Date', 'GDP')
-    gdp['Country Name'].replace({"United States": "United States of America", "Cote d'Ivoire": "Ivory Coast"}, inplace=True)
     return gdp
 
 def get_footprint():
-    footprint = pd.read_csv("Carbon Footprint, 1990-2017 (in MtCO2).csv")
-    footprint = lib.columns_to_values(footprint, 1, end_index=8)
+    footprint = pd.read_csv("data/Carbon Footprint, 1990-2017 (in MtCO2).csv", sep=";", decimal=",")
+    footprint = lib.columns_to_values(footprint, 1, 'Country', 'FootPrint', end_index=8)
+    lib.rename_column(footprint, "Date")
+    lib.convert_date(footprint)
+    for i in range(len(footprint)):
+        footprint["Country"][i] = footprint["Country"][i][0:-19]
     return footprint
+     
 
 def get_comparison():
     gdp = get_gdp()
     ghg = get_ghg()
-    print(ghg[ghg["Country"]=="United States of America"]["Date"].unique())
-    print(gdp[gdp["Country Name"]=="United States of America"])
+    print(ghg['Country'])
     comparison = gdp.merge(ghg, left_on=["Date", "Country Name"], right_on=["Date", "Country"])
     return comparison
 
