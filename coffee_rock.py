@@ -44,7 +44,7 @@ app.layout = html.Div(children=[
         id='comparison'
     ),
 
-    html.H2(children='Energy consumption'),
+    html.H3(children='Energy consumption'),
 
     # Afficher la production d’énergies
     html.Div(children=['''
@@ -97,7 +97,6 @@ def update_graph(country_name, data):
     Input('country-name', 'value'),
     Input('date', 'value'))
 def update_energy(country_name, date):
-    print(energy_cons_by_source)
     energy_data = lib.select_date(date, energy_cons_by_source)
     energy_data = lib.select_country(country_name, energy_data)
     print("energy-by-source")

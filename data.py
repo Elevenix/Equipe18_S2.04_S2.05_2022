@@ -33,8 +33,6 @@ def get_footprint():
 def get_comparison():
     gdp = get_gdp()
     ghg = get_ghg()
-    print(ghg[ghg["Country"]=="United States of America"]["Date"].unique())
-    print(gdp[gdp["Country Name"]=="United States of America"])
     comparison = gdp.merge(ghg, left_on=["Date", "Country Name"], right_on=["Date", "Country"])
     return comparison
 
