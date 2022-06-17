@@ -35,7 +35,7 @@ app.layout = html.Div(children=[
 
     dcc.Tabs(id='data', value='PIB', children=[
         dcc.Tab(label='GDP', value='PIB'),
-        dcc.Tab(label='Emissions', value='Emissions_GES'),
+        dcc.Tab(label='Emissions', value='Emission_GES'),
     ]),
     
     # Fonctionnalité: Afficher les GES en fonction du pays
