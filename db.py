@@ -11,8 +11,6 @@ def get_sectors(conn):
 
 def merge_countries(conn, df):
     countries = get_countries(conn)
-    print(countries)
-    print(df)
     return df.merge(countries, on="id_Pays")
 
 def merge_energies(conn, df):

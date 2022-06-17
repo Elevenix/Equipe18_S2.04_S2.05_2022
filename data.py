@@ -12,7 +12,7 @@ def get_change_deg():
 
 def get_ghg():
     ghg = pd.read_csv("data/Greenhouse Gas per capita, 1850-2015 (in tCO2eq).csv", sep=";", decimal=",")
-    ghg = lib.columns_to_values(ghg, 1, 'Country','Emissions', end_index=6)
+    ghg = lib.columns_to_values(ghg, 1, 'Country','Emissions', end_index=8)
     lib.rename_column(ghg, "Date")
     lib.convert_date(ghg)
     return ghg
@@ -21,14 +21,19 @@ def get_gdp():
     #modif csv en xls
     gdp = pd.read_excel("data/API_NY.GDP.MKTP.KD_DS2_en_excel_v2_4150998.xls")
     gdp.to_csv("data/API_NY.GDP.MKTP.KD_DS2_en_csv_v2_4150850.csv", sep=";", decimal=",")
-    print(gdp.columns)
+    print(gdp['Country Name'])
     gdp = lib.columns_to_values(gdp, 4, 'Date', 'GDP')
     return gdp
 
+def get_footprint():
+    footprint = pd.read_csv("Carbon Footprint, 1990-2017 (in MtCO2).csv")
+    footprint = lib.columns_to_values(footprint, 1, end_index=8)
+    return footprint
 
 def get_comparison():
     gdp = get_gdp()
     ghg = get_ghg()
+    print(ghg['Country'])
     comparison = gdp.merge(ghg, left_on=["Date", "Country Name"], right_on=["Date", "Country"])
     return comparison
 
@@ -40,7 +45,12 @@ def get_energy_cons_by_source():
 
     energy_countries=[
         ("data/Primary Energy Consumption by source, France, 1980-2016 (in Mtoe).csv", "France"),
-        ("data/Primary Energy Consumption by source, China, 1980-2016 (in Mtoe).csv", "China")
+        ("data/Primary Energy Consumption by source, China, 1980-2016 (in Mtoe).csv", "China"),
+        ("data/Primary Energy Consumption by source, India, 1980-2016 (in Mtoe).csv", "India"),
+        ("data/Primary Energy Consumption by source, Denmark, 1980-2016 (in Mtoe).csv", "Denmark"),
+        ("data/Primary Energy Consumption by source, Germany, 1980-2016 (in Mtoe).csv", "Germany"),
+        ("data/Primary Energy Consumption by source, Ivory Coast, 1980-2016 (in Mtoe).csv", "Ivory Coast"),
+        ("data/Primary Energy Consumption by source, United States of America, 1980-2016 (in Mtoe).csv", "United States of America"),
     ]
     energy["Country Name"] = "World"
     for val in energy_countries:
