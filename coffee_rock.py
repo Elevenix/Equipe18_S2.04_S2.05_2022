@@ -2,21 +2,26 @@ import pandas
 import plotly.express as px
 import lib
 import data
+import db
 from dash import Dash, dcc, html, Input, Output
 pandas.options.plotting.backend = "plotly"
-
+conn = db.connect()
 ### Chargement des données
-energy_cons_by_source = data.get_energy_cons_by_source()
+#energy_cons_by_source = data.get_energy_cons_by_source()
+energy_cons_by_source = db.get_utilise(conn)
 sea_level = data.get_sea_level()
 change_deg = data.get_change_deg()
-comparison = data.get_comparison()
-energy_by_sector = data.get_energy_by_sector()
-
+#comparison = data.get_comparison()
+comparison = db.get_emissions(conn)
+energy_by_sector = db.get_consumption(conn)
+#energy_by_sector = db.get()
 ### Affichage
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
-energy_by_sector_fig = px.bar(energy_by_sector, x="Year", y="Consumption", color="Category")
+energy_by_sector_fig = px.bar(energy_by_sector, x="Annee", y="Quantite", color="Nom_Secteur")
+#energy_by_sector_fig = px.bar()
+
 
 degree_map = lib.map(change_deg, 'tas_anom')
 sea_level_map  = lib.map(sea_level, 'total')
@@ -26,11 +31,11 @@ app.layout = html.Div(children=[
 
     html.Div(children=['''
     ''', html.Label('Country'),
-        dcc.Dropdown(comparison['Country Name'].unique(), id="country-name", value='France')]),
+        dcc.Dropdown(comparison['Nom_Pays'].unique(), id="country-name", value='France')]),
 
-    dcc.Tabs(id='data', value='GDP', children=[
-        dcc.Tab(label='GDP', value='GDP'),
-        dcc.Tab(label='Emissions', value='Emissions'),
+    dcc.Tabs(id='data', value='PIB', children=[
+        dcc.Tab(label='GDP', value='PIB'),
+        dcc.Tab(label='Emissions', value='Emissions_GES'),
     ]),
     
     # Fonctionnalité: Afficher les GES en fonction du pays
@@ -43,8 +48,8 @@ app.layout = html.Div(children=[
 
     # Afficher la production d’énergies
     html.Div(children=['''
-    ''', html.Label('Year'),
-        dcc.Dropdown(energy_cons_by_source['Date'].unique(), id="date", value="2016")]),
+    ''', html.Label('Annee'),
+        dcc.Dropdown(energy_cons_by_source['Annee'].unique(), id="date", value="2016")]),
 
     dcc.Graph(
         id='energy-by-source',
@@ -85,16 +90,18 @@ app.layout = html.Div(children=[
 def update_graph(country_name, data):
     comparison_data = lib.select_country(country_name, comparison)
     energy_data = lib.select_country(country_name, energy_cons_by_source)
-    return (comparison_data.plot(x='Date', y=data), px.line(energy_data, x="Date", y="Value", color="Source", title='Energy consumption by source over time'))
+    return (comparison_data.plot(x='Annee', y=data), px.line(energy_data, x="Annee", y="Qtt_Energie_Cons", color="Nom_Energie", title='Energy consumption by source over time'))
 
 @app.callback(
     Output('energy-by-source', 'figure'),
     Input('country-name', 'value'),
     Input('date', 'value'))
 def update_energy(country_name, date):
+    print(energy_cons_by_source)
     energy_data = lib.select_date(date, energy_cons_by_source)
     energy_data = lib.select_country(country_name, energy_data)
-    return px.pie(energy_data, values="Value", names="Source")
+    print("energy-by-source")
+    return px.pie(energy_data, values="Qtt_Energie_Cons", names="Nom_Energie")
 
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -1,13 +1,14 @@
 import xarray as xr
-import pandas
+import pandas as pd
 import plotly.express as px
+
 # Convertir netcdf en csv
 def netcdf_to_csv(input, output):
     xr.open_dataset(input).to_dataframe().to_csv(output)
 
 # Créér une table dans la BD à partir d'un fichier CSV
 def table_from_csv(conn, file, name):
-    df = pandas.read_csv(file)
+    df = pd.read_csv(file)
     df.to_sql(name, conn, if_exists="replace")
 
 def columns_to_values(df, index, name, value_name="Value", end_index=None):
@@ -18,7 +19,7 @@ def columns_to_values(df, index, name, value_name="Value", end_index=None):
 
 # Sélectionner un pays
 def select_country(name, df):
-    return df[df['Country Name']==name]
+    return df[df['Nom_Pays']==name]
 
 # Exclure des lignes contenant des valeurs
 def exclude(df, column, values=[]):
@@ -32,7 +33,7 @@ def rename_column(df, name):
 
 # Sélectionner avec la date
 def select_date(date, df):
-    return df[df["Date"]==date]
+    return df[df["Annee"]==date]
 
 # Sélectionner avec la source
 def select_source(source, df):

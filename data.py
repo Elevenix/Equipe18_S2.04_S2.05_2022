@@ -1,27 +1,27 @@
 import lib
-import pandas
-pandas.options.plotting.backend = "plotly"
+import pandas as pd
 
-# On replace les read_csv par des read_sql
+pd.options.plotting.backend = "plotly"
 
 def get_sea_level():
-    return pandas.read_csv("data/CMIP6 - Sea level rise (SLR) Change meters - Long Term (2081-2100) SSP5-8.5 (rel. to 1995-2014) - Annual.csv")
+    return pd.read_csv("data/CMIP6 - Sea level rise (SLR) Change meters - Long Term (2081-2100) SSP5-8.5 (rel. to 1995-2014) - Annual.csv")
 
 def get_change_deg():
-    lib.netcdf_to_csv("data/CMIP6 - Mean temperature (T) Change deg C - Medium Term (2041-2060) SSP5-8.5 (rel. to 1995-2014) - Annual (34 models).nc", "change_deg.csv")
-    change_deg = pandas.read_csv("change_deg.csv")
-    print(change_deg)
-    return change_deg[change_deg["tas_anom"] != None]
+    lib.netcdf_to_csv("data/CMIP6 - Mean temperature (T) Change deg C - Medium Term (2041-2060) SSP5-8.5 (rel. to 1995-2014) - Annual (34 models).nc", "data/change_deg.csv")
+    return pd.read_csv("data/change_deg.csv")
 
 def get_ghg():
-    ghg = pandas.read_csv("data/Greenhouse Gas per capita, 1850-2015 (in tCO2eq).csv", sep=";", decimal=",")
+    ghg = pd.read_csv("data/Greenhouse Gas per capita, 1850-2015 (in tCO2eq).csv", sep=";", decimal=",")
     ghg = lib.columns_to_values(ghg, 1, 'Country','Emissions', end_index=6)
     lib.rename_column(ghg, "Date")
     lib.convert_date(ghg)
     return ghg
 
 def get_gdp():
-    gdp = pandas.read_csv("data/API_NY.GDP.MKTP.KD_DS2_en_csv_v2_4150850.csv")
+    #modif csv en xls
+    gdp = pd.read_excel("data/API_NY.GDP.MKTP.KD_DS2_en_excel_v2_4150998.xls")
+    gdp.to_csv("data/API_NY.GDP.MKTP.KD_DS2_en_csv_v2_4150850.csv", sep=";", decimal=",")
+    print(gdp.columns)
     gdp = lib.columns_to_values(gdp, 4, 'Date', 'GDP')
     return gdp
 
@@ -33,7 +33,7 @@ def get_comparison():
     return comparison
 
 def get_energy_cons_by_source():
-    energy = pandas.read_csv("data/Primary Energy Consumption by source, World, 1980-2016 (in Mtoe).csv")
+    energy = pd.read_csv("data/Primary Energy Consumption by source, World, 1980-2016 (in Mtoe).csv",sep=";", decimal=",")
     # TODO: INSERT 0s WHEN CELL IS EMPTY
     energy = lib.columns_to_values(energy, 1, 'Source', end_index=11)
 
@@ -44,17 +44,17 @@ def get_energy_cons_by_source():
     ]
     energy["Country Name"] = "World"
     for val in energy_countries:
-        energy_country = pandas.read_csv(val[0])
+        energy_country = pd.read_csv(val[0], sep=";", decimal=",")
         energy_country= lib.columns_to_values(energy_country, 1, 'Source', end_index=11)
         energy_country["Country Name"] = val[1]
-        energy = pandas.concat([energy, energy_country], axis=0)
+        energy = pd.concat([energy, energy_country], axis=0)
     lib.rename_column(energy, "Date")
     lib.convert_date(energy)
     return energy
 
 def get_energy_by_sector():
-    energy_by_sector = pandas.read_excel("data/IRENA_REmap_Global_Renewables_Outlook_2020_edition.xlsx")
-    energy_by_sector = lib.columns_to_values(energy_by_sector, 5, "Year", "Consumption", end_index=8)
+    energy_by_sector = pd.read_excel("data/IRENA_REmap_Global_Renewables_Outlook_2020_edition.xlsx")
+    energy_by_sector = lib.columns_to_values(energy_by_sector, 5, "Annee", "Consumption", end_index=8)
     energy_by_sector = energy_by_sector[
         (energy_by_sector["Sub-category"] == "Total")
         & (energy_by_sector["Region"] == "World")
@@ -64,5 +64,4 @@ def get_energy_by_sector():
 
     energy_by_sector = lib.exclude(energy_by_sector, "Category", ["TFEC (excl. non-energy uses)", "TPES"])
     return energy_by_sector
-
 
