@@ -4,11 +4,6 @@ import plotly.express as px
 
 pd.options.plotting.backend="plotly"
 
-def columns_to_values(df, index, name):
-    return df.melt(id_vars=df.iloc[:, 0:index], 
-        var_name=name,
-        value_name="Value")
-
 # Création de chaque DataFrame
 df_carbon = pd.read_csv('data/Carbon Footprint, 1990-2017 (in MtCO2).csv', decimal=',', sep=';')
 df_carbon_world = pd.read_csv('data/Carbon Footprint, World, 1990-2017 (in MtCO2).csv', decimal=',', sep=';')
@@ -18,13 +13,13 @@ df_energyproduction = pd.read_csv('data/Primary Energy Production, 1900-2016 (in
 df_energyproduction_world = pd.read_csv('data/Primary Energy Production, World, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
 
 # Création de chaque DataFrame pour chaque pays producteur d'énergie primaire
-df_energyproduction_china = pd.read_csv('data\primaryEnergyProduction\Primary Energy Production by source, China, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
-df_energyproduction_denmark = pd.read_csv('data\primaryEnergyProduction\Primary Energy Production by source, Denmark, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
-df_energyproduction_france = pd.read_csv('data\primaryEnergyProduction\Primary Energy Production by source, France, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
-df_energyproduction_germany = pd.read_csv('data\primaryEnergyProduction\Primary Energy Production by source, Germany, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
-df_energyproduction_india = pd.read_csv('data\primaryEnergyProduction\Primary Energy Production by source, India, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
-df_energyproduction_ivorycoast = pd.read_csv('data\primaryEnergyProduction\Primary Energy Production by source, Ivory Coast, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
-df_energyproduction_unitedstates = pd.read_csv('data\primaryEnergyProduction\Primary Energy Production by source, United States of America, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
+df_energyproduction_china = pd.read_csv('data/primaryEnergyProduction/Primary Energy Production by source, China, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
+df_energyproduction_denmark = pd.read_csv('data/primaryEnergyProduction/Primary Energy Production by source, Denmark, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
+df_energyproduction_france = pd.read_csv('data/primaryEnergyProduction/Primary Energy Production by source, France, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
+df_energyproduction_germany = pd.read_csv('data/primaryEnergyProduction/Primary Energy Production by source, Germany, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
+df_energyproduction_india = pd.read_csv('data/primaryEnergyProduction/Primary Energy Production by source, India, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
+df_energyproduction_ivorycoast = pd.read_csv('data/primaryEnergyProduction/Primary Energy Production by source, Ivory Coast, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
+df_energyproduction_unitedstates = pd.read_csv('data/primaryEnergyProduction/Primary Energy Production by source, United States of America, 1900-2016 (in Mtoe).csv', decimal=',', sep=';')
 
 # Rajout du pays dans un DataFrame
 df_energyproduction_china = df_energyproduction_china.rename(columns=({df_energyproduction_china.columns[0] : 'China'}))
