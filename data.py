@@ -21,8 +21,8 @@ def get_gdp():
     #modif csv en xls
     gdp = pd.read_excel("data/API_NY.GDP.MKTP.KD_DS2_en_excel_v2_4150998.xls")
     gdp.to_csv("data/API_NY.GDP.MKTP.KD_DS2_en_csv_v2_4150850.csv", sep=";", decimal=",")
-    print(gdp['Country Name'])
     gdp = lib.columns_to_values(gdp, 4, 'Date', 'GDP')
+    gdp['Country Name'].replace({"United States": "United States of America", "Cote d'Ivoire": "Ivory Coast"}, inplace=True)
     return gdp
 
 def get_footprint():
@@ -33,7 +33,8 @@ def get_footprint():
 def get_comparison():
     gdp = get_gdp()
     ghg = get_ghg()
-    print(ghg['Country'])
+    print(ghg[ghg["Country"]=="United States of America"]["Date"].unique())
+    print(gdp[gdp["Country Name"]=="United States of America"])
     comparison = gdp.merge(ghg, left_on=["Date", "Country Name"], right_on=["Date", "Country"])
     return comparison
 

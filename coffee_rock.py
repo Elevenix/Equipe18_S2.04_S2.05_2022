@@ -21,7 +21,7 @@ app = Dash(__name__, suppress_callback_exceptions=True)
 
 energy_by_sector_fig = px.bar(energy_by_sector, x="Annee", y="Quantite", color="Nom_Secteur")
 #energy_by_sector_fig = px.bar()
-
+print(comparison['id_Pays'].unique())
 
 degree_map = lib.map(change_deg, 'tas_anom')
 sea_level_map  = lib.map(sea_level, 'total')

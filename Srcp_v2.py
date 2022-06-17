@@ -95,7 +95,7 @@ Energie(conn)
 
 def insert_emissions(conn):
     base = data.get_comparison()
-    print(base)
+    print(base["Country Name"].unique())
     pays = pd.read_sql('SELECT * FROM T_Pays', conn)
     base = base.merge(pays, left_on='Country Name', right_on="Nom_Pays", how="inner")
     base.rename(columns={"GDP": "PIB", "Date": "Annee", "Emissions": "Emission_GES"}, inplace=True)
