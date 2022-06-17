@@ -45,12 +45,17 @@ app.layout = html.Div(children=[
         id='comparison'
     ),
 
-    html.H3(children='Energy consumption'),
+    html.H3(children='Energy'),
 
     # Afficher la production d’énergies
     html.Div(children=['''
     ''', html.Label('Annee'),
         dcc.Dropdown(energy_cons_by_source['Annee'].unique(), id="date", value="2016")]),
+
+    dcc.Tabs(id='energy-usage', value='Qtt_Energie_Cons', children=[
+        dcc.Tab(label='Production', value='Qtt_Energie_Prod'),
+        dcc.Tab(label='Consumption', value='Qtt_Energie_Cons'),
+    ]),
 
     dcc.Graph(
         id='energy-by-source',
@@ -60,12 +65,14 @@ app.layout = html.Div(children=[
         id='energy-consumption',
     ),
 
+
     html.H2(children='Global energy consumption by sector'),
 
     dcc.Graph(
         id='energy-by-sector',
         figure=energy_by_sector_fig
     ),
+
 
     html.H2(children='Temperature change'),
     dcc.Graph(
@@ -74,7 +81,7 @@ app.layout = html.Div(children=[
     ),
 
 
-    html.H2(children='Sea level change'),
+    html.H2(children='Sea level change 2080-2100 (in meters)'),
 
     dcc.Graph(
         id='sea-level-map',
@@ -87,21 +94,23 @@ app.layout = html.Div(children=[
     Output('comparison', 'figure'),
     Output('energy-consumption', 'figure'),
     Input('country-name', 'value'),
+    Input('energy-usage', 'value'),
     Input('data', 'value'))
-def update_graph(country_name, data):
+def update_graph(country_name, energy_usage, data):
     comparison_data = lib.select_country(country_name, comparison)
     energy_data = lib.select_country(country_name, energy_cons_by_source)
-    return (comparison_data.plot(x='Annee', y=data), px.line(energy_data, x="Annee", y="Qtt_Energie_Cons", color="Nom_Energie", title='Energy consumption by source over time'))
+    cons_fig = px.line(energy_data, x="Annee", y=energy_usage, color="Nom_Energie", title='Energy by source over time')
+    return (comparison_data.plot(x='Annee', y=data), cons_fig)
 
 @app.callback(
     Output('energy-by-source', 'figure'),
+    Input('energy-usage', 'value'),
     Input('country-name', 'value'),
     Input('date', 'value'))
-def update_energy(country_name, date):
+def update_energy(energy_usage, country_name, date):
     energy_data = lib.select_date(date, energy_cons_by_source)
     energy_data = lib.select_country(country_name, energy_data)
-    print("energy-by-source")
-    return px.pie(energy_data, values="Qtt_Energie_Cons", names="Nom_Energie")
+    return px.pie(energy_data, values=energy_usage, names="Nom_Energie")
 
 if __name__ == '__main__':
     app.run_server(debug=True)

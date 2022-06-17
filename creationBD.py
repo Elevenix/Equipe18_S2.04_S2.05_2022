@@ -63,6 +63,7 @@ CREATE TABLE TJ_Energies_Pays (
     id_Energie INT NOT NULL,
     id_Pays INT NOT NULL,
     Qtt_Energie_Cons REAL NOT NULL,
+    Qtt_Energie_Prod REAL NOT NULL,
     Annee INT NOT NULL,
     CONSTRAINT FK_Energie FOREIGN KEY (id_Energie)
         REFERENCES T_Energies(id_Energie),

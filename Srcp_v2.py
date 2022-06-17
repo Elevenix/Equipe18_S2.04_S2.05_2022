@@ -117,8 +117,11 @@ def insert_utilise(conn):
     pays = pd.read_sql('SELECT * FROM T_Pays', conn)
     base = base.merge(pays, left_on='Country Name', right_on="Nom_Pays", how="inner")
     base.rename(columns={"Date": "Annee", "Value": "Qtt_Energie_Cons"}, inplace=True)
-    base = base[['id_Energie', 'id_Pays', 'Qtt_Energie_Cons', 'Annee']]
-    base.to_sql("TJ_Energies_Pays", conn, if_exists='append', index=False)
+    base2 = data.get_energy_prod_by_source()
+    base2.rename(columns={"Value": "Qtt_Energie_Prod"}, inplace=True)
+    base2 = base2.merge(base, left_on=['Source', 'Country Name', 'Date'], right_on=["Nom_Energie", "Nom_Pays","Annee"], how="inner")
+    base2 = base2[['id_Energie', 'id_Pays', 'Qtt_Energie_Cons', 'Qtt_Energie_Prod', 'Annee']]
+    base2.to_sql("TJ_Energies_Pays", conn, if_exists='append', index=False)
     
 insert_utilise(conn)
 

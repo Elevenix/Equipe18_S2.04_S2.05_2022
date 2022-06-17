@@ -67,6 +67,32 @@ def get_energy_cons_by_source():
     lib.convert_date(energy)
     return energy
 
+
+def get_energy_prod_by_source():
+    energy = pd.read_csv("data/Primary Energy Production by source, World, 1900-2016 (in Mtoe).csv",sep=";", decimal=",")
+    # TODO: INSERT 0s WHEN CELL IS EMPTY
+    energy = lib.columns_to_values(energy, 1, 'Source', end_index=11)
+
+
+    energy_countries=[
+        ("data/Primary Energy Production by source, France, 1900-2016 (in Mtoe).csv", "France"),
+        ("data/Primary Energy Production by source, China, 1900-2016 (in Mtoe).csv", "China"),
+        ("data/Primary Energy Production by source, India, 1900-2016 (in Mtoe).csv", "India"),
+        ("data/Primary Energy Production by source, Denmark, 1900-2016 (in Mtoe).csv", "Denmark"),
+        ("data/Primary Energy Production by source, Germany, 1900-2016 (in Mtoe).csv", "Germany"),
+        ("data/Primary Energy Production by source, Ivory Coast, 1900-2016 (in Mtoe).csv", "Ivory Coast"),
+        ("data/Primary Energy Production by source, United States of America, 1900-2016 (in Mtoe).csv", "United States of America"),
+    ]
+    energy["Country Name"] = "World"
+    for val in energy_countries:
+        energy_country = pd.read_csv(val[0], sep=";", decimal=",")
+        energy_country= lib.columns_to_values(energy_country, 1, 'Source', end_index=11)
+        energy_country["Country Name"] = val[1]
+        energy = pd.concat([energy, energy_country], axis=0)
+    lib.rename_column(energy, "Date")
+    lib.convert_date(energy)
+    return energy
+
 def get_energy_by_sector():
     energy_by_sector = pd.read_excel("data/IRENA_REmap_Global_Renewables_Outlook_2020_edition.xlsx")
     energy_by_sector = lib.columns_to_values(energy_by_sector, 5, "Annee", "Consumption", end_index=8)
