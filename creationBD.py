@@ -89,6 +89,7 @@ cursor.execute("""
         REF_Emission_Pays INT NOT NULL,
         PIB REAL,
         Emission_GES REAL,
+        Carb_Footprint REAL,
         Annee INT NOT NULL,
         CONSTRAINT FK_Emission_Pays FOREIGN KEY (REF_Emission_Pays)
             REFERENCES T_Pays(id_Pays)
