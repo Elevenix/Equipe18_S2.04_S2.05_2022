@@ -62,7 +62,6 @@ cursor.execute("""
 CREATE TABLE TJ_Energies_Pays (
     id_Energie INT NOT NULL,
     id_Pays INT NOT NULL,
-    Qtt_Energie_Prod REAL,
     Qtt_Energie_Cons REAL NOT NULL,
     Annee INT NOT NULL,
     CONSTRAINT FK_Energie FOREIGN KEY (id_Energie)
@@ -74,7 +73,7 @@ CREATE TABLE TJ_Energies_Pays (
 
 # Creation de la table activite
 cursor.execute("""
-CREATE TABLE T_Secteur (
+CREATE TABLE T_Secteurs (
     id_Secteur INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     REF_Secteur_Pays INT,
     Nom_Secteur VARCHAR(100) NOT NULL,
@@ -87,10 +86,10 @@ CREATE TABLE T_Secteur (
 cursor.execute("""
     CREATE TABLE T_Emissions (
         id_Emission INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-        REF_Emission_Pays INT,
-        PIB REAL NOT NULL,
-        Emission_GES REAL NOT NULL,
-        Année INT NOT NULL
+        REF_Emission_Pays INT NOT NULL,
+        PIB REAL,
+        Emission_GES REAL,
+        Annee INT NOT NULL,
         CONSTRAINT FK_Emission_Pays FOREIGN KEY (REF_Emission_Pays)
             REFERENCES T_Pays(id_Pays)
 )
